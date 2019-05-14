@@ -1,0 +1,8 @@
+﻿  pch.cpp
+  CameraConfiguration.cpp
+c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\cameraconfiguration.h(2): fatal error C1083: Cannot open include file: 'Spinnaker.h': No such file or directory
+  CamUtil.cpp
+c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\camutil.h(2): fatal error C1083: Cannot open include file: 'Spinnaker.h': No such file or directory
+  VizlabRecording.cpp
+c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(2): fatal error C1083: Cannot open include file: 'Spinnaker.h': No such file or directory
+  Generating Code...
