@@ -32,8 +32,8 @@ c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(
 c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(235): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
 c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(271): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
   Generating code
-  5 of 996 functions ( 0.5%) were compiled, the rest were copied from previous compilation.
-    4 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+  2 of 941 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    7 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   VizlabRecording.vcxproj -> C:\Users\erlin\source\repos\VizlabRecording\x64\Release\VizlabRecording.exe

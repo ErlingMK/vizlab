@@ -66,8 +66,8 @@ void AcquireImages(CameraPtr pCam, const unsigned int num_of_images, shared_ptr<
 			{
 				// Holds until trigger signal
 				ImagePtr pResultImage = pCam->GetNextImage();
-				TimePoint<chrono::nanoseconds> now = chrono::high_resolution_clock::now();
-				timePoints->push_back(now);
+				//TimePoint<chrono::nanoseconds> now = chrono::high_resolution_clock::now();
+				//timePoints->push_back(now);
 
 				if (pResultImage->IsIncomplete())
 				{

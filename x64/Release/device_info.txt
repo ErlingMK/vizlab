@@ -1,0 +1,114 @@
+DeviceID : 17513902
+DeviceSerialNumber : 17513902
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly S BFS-U3-13Y3C
+DeviceType : U3V
+DeviceDisplayName : Point Grey Research Blackfly S BFS-U3-13Y3C
+DeviceAccessStatus : ReadWrite
+DeviceVersion : 1608.0.47.0
+DeviceDriverVersion : PGRUSBCam3.sys : 2.7.3.249
+DeviceUserID : 
+DeviceIsUpdater : 0
+DeviceInstanceId : USB\VID_1E10&PID_4000&MI_00\8&154C825A&0&0000
+DeviceCurrentSpeed : HighSpeed
+GUIXMLLocation : Device
+GUIXMLPath : Input.xml
+GenICamXMLLocation : Device
+GenICamXMLPath : 
+DeviceU3VProtocol : 1
+
+DeviceID : 17514071
+DeviceSerialNumber : 17514071
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly S BFS-U3-13Y3C
+DeviceType : U3V
+DeviceDisplayName : Point Grey Research Blackfly S BFS-U3-13Y3C
+DeviceAccessStatus : ReadWrite
+DeviceVersion : 1608.0.47.0
+DeviceDriverVersion : PGRUSBCam3.sys : 2.7.3.249
+DeviceUserID : 
+DeviceIsUpdater : 0
+DeviceInstanceId : USB\VID_1E10&PID_4000&MI_00\8&C4D1874&0&0000
+DeviceCurrentSpeed : HighSpeed
+GUIXMLLocation : Device
+GUIXMLPath : Input.xml
+GenICamXMLLocation : Device
+GenICamXMLPath : 
+DeviceU3VProtocol : 1
+
+DeviceID : 17514074
+DeviceSerialNumber : 17514074
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly S BFS-U3-13Y3C
+DeviceType : U3V
+DeviceDisplayName : Point Grey Research Blackfly S BFS-U3-13Y3C
+DeviceAccessStatus : ReadWrite
+DeviceVersion : 1608.0.47.0
+DeviceDriverVersion : PGRUSBCam3.sys : 2.7.3.249
+DeviceUserID : 
+DeviceIsUpdater : 0
+DeviceInstanceId : USB\VID_1E10&PID_4000&MI_00\7&157167FB&0&0000
+DeviceCurrentSpeed : HighSpeed
+GUIXMLLocation : Device
+GUIXMLPath : Input.xml
+GenICamXMLLocation : Device
+GenICamXMLPath : 
+DeviceU3VProtocol : 1
+
+DeviceID : 17513902
+DeviceSerialNumber : 17513902
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly S BFS-U3-13Y3C
+DeviceType : U3V
+DeviceDisplayName : Point Grey Research Blackfly S BFS-U3-13Y3C
+DeviceAccessStatus : ReadWrite
+DeviceVersion : 1608.0.47.0
+DeviceDriverVersion : PGRUSBCam3.sys : 2.7.3.249
+DeviceUserID : 
+DeviceIsUpdater : 0
+DeviceInstanceId : USB\VID_1E10&PID_4000&MI_00\8&154C825A&0&0000
+DeviceCurrentSpeed : HighSpeed
+GUIXMLLocation : Device
+GUIXMLPath : Input.xml
+GenICamXMLLocation : Device
+GenICamXMLPath : 
+DeviceU3VProtocol : 1
+
+DeviceID : 17514071
+DeviceSerialNumber : 17514071
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly S BFS-U3-13Y3C
+DeviceType : U3V
+DeviceDisplayName : Point Grey Research Blackfly S BFS-U3-13Y3C
+DeviceAccessStatus : ReadWrite
+DeviceVersion : 1608.0.47.0
+DeviceDriverVersion : PGRUSBCam3.sys : 2.7.3.249
+DeviceUserID : 
+DeviceIsUpdater : 0
+DeviceInstanceId : USB\VID_1E10&PID_4000&MI_00\8&C4D1874&0&0000
+DeviceCurrentSpeed : HighSpeed
+GUIXMLLocation : Device
+GUIXMLPath : Input.xml
+GenICamXMLLocation : Device
+GenICamXMLPath : 
+DeviceU3VProtocol : 1
+
+DeviceID : 17514074
+DeviceSerialNumber : 17514074
+DeviceVendorName : Point Grey Research
+DeviceModelName : Blackfly S BFS-U3-13Y3C
+DeviceType : U3V
+DeviceDisplayName : Point Grey Research Blackfly S BFS-U3-13Y3C
+DeviceAccessStatus : ReadWrite
+DeviceVersion : 1608.0.47.0
+DeviceDriverVersion : PGRUSBCam3.sys : 2.7.3.249
+DeviceUserID : 
+DeviceIsUpdater : 0
+DeviceInstanceId : USB\VID_1E10&PID_4000&MI_00\7&157167FB&0&0000
+DeviceCurrentSpeed : HighSpeed
+GUIXMLLocation : Device
+GUIXMLPath : Input.xml
+GenICamXMLLocation : Device
+GenICamXMLPath : 
+DeviceU3VProtocol : 1
+
