@@ -1,39 +1,40 @@
-﻿  VizlabRecording.cpp
-c:\users\erlin\source\repos\vizlabrecording\include\exception.h(46): warning C4275: non dll-interface class 'std::exception' used as base for dll-interface class 'Spinnaker::Exception'
-  c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.16.27023\include\vcruntime_exception.h(44): note: see declaration of 'std::exception'
-  c:\users\erlin\source\repos\vizlabrecording\include\exception.h(45): note: see declaration of 'Spinnaker::Exception'
-c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\nodemap.h(284): warning C4251: 'Spinnaker::GenApi::NodeMap::m_portAdapters': class 'std::vector<std::shared_ptr<Spinnaker::GenApi::PortAdapter>,std::allocator<_Ty>>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::NodeMap'
-          with
-          [
-              _Ty=std::shared_ptr<Spinnaker::GenApi::PortAdapter>
-          ]
-  c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\nodemap.h(284): note: see declaration of 'std::vector<std::shared_ptr<Spinnaker::GenApi::PortAdapter>,std::allocator<_Ty>>'
-          with
-          [
-              _Ty=std::shared_ptr<Spinnaker::GenApi::PortAdapter>
-          ]
-c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\nodemap.h(286): warning C4251: 'Spinnaker::GenApi::NodeMap::m_nodeMap': class 'std::map<Spinnaker::GenICam::gcstring,std::shared_ptr<Spinnaker::GenApi::INode>,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::NodeMap'
-          with
-          [
-              _Kty=Spinnaker::GenICam::gcstring,
-              _Ty=std::shared_ptr<Spinnaker::GenApi::INode>
-          ]
-  c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\nodemap.h(278): note: see declaration of 'std::map<Spinnaker::GenICam::gcstring,std::shared_ptr<Spinnaker::GenApi::INode>,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>'
-          with
-          [
-              _Kty=Spinnaker::GenICam::gcstring,
-              _Ty=std::shared_ptr<Spinnaker::GenApi::INode>
-          ]
-c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\eventport.h(158): warning C4251: 'Spinnaker::GenApi::CEventPort::m_pNode': class 'Spinnaker::GenApi::CPointer<Spinnaker::GenApi::INode,Spinnaker::GenApi::IBase>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::CEventPort'
-  c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\pointer.h(276): note: see declaration of 'Spinnaker::GenApi::CPointer<Spinnaker::GenApi::INode,Spinnaker::GenApi::IBase>'
-c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\eventport.h(160): warning C4251: 'Spinnaker::GenApi::CEventPort::m_pPortAdapter': class 'std::shared_ptr<Spinnaker::GenApi::PortAdapter>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::CEventPort'
-  c:\users\erlin\source\repos\vizlabrecording\include\spingenapi\nodemap.h(284): note: see declaration of 'std::shared_ptr<Spinnaker::GenApi::PortAdapter>'
-c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(223): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(235): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-c:\users\erlin\source\repos\vizlabrecording\vizlabrecording\vizlabrecording.cpp(271): warning C4267: 'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+﻿  Recording.cpp
+C:\Users\erlin\source\repos\VizlabRecording\include\Exception.h(46,5): warning C4275:  non dll-interface class 'std::exception' used as base for dll-interface class 'Spinnaker::Exception'
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.21.27702\include\vcruntime_exception.h(44): message :  see declaration of 'std::exception'
+C:\Users\erlin\source\repos\VizlabRecording\include\Exception.h(45): message :  see declaration of 'Spinnaker::Exception'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284,79): warning C4251:  'Spinnaker::GenApi::NodeMap::m_portAdapters': class 'std::vector<std::shared_ptr<Spinnaker::GenApi::PortAdapter>,std::allocator<_Ty>>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::NodeMap'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284,79): warning C4251:         with
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284,79): warning C4251:         [
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284,79): warning C4251:             _Ty=std::shared_ptr<Spinnaker::GenApi::PortAdapter>
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284,79): warning C4251:         ]
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :  see declaration of 'std::vector<std::shared_ptr<Spinnaker::GenApi::PortAdapter>,std::allocator<_Ty>>'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :         with
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :         [
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :             _Ty=std::shared_ptr<Spinnaker::GenApi::PortAdapter>
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :         ]
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(286,85): warning C4251:  'Spinnaker::GenApi::NodeMap::m_nodeMap': class 'std::map<Spinnaker::GenICam::gcstring,std::shared_ptr<Spinnaker::GenApi::INode>,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::NodeMap'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(286,85): warning C4251:         with
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(286,85): warning C4251:         [
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(286,85): warning C4251:             _Kty=Spinnaker::GenICam::gcstring,
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(286,85): warning C4251:             _Ty=std::shared_ptr<Spinnaker::GenApi::INode>
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(286,85): warning C4251:         ]
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(278): message :  see declaration of 'std::map<Spinnaker::GenICam::gcstring,std::shared_ptr<Spinnaker::GenApi::INode>,std::less<_Kty>,std::allocator<std::pair<const _Kty,_Ty>>>'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(278): message :         with
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(278): message :         [
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(278): message :             _Kty=Spinnaker::GenICam::gcstring,
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(278): message :             _Ty=std::shared_ptr<Spinnaker::GenApi::INode>
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(278): message :         ]
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\EventPort.h(158,29): warning C4251:  'Spinnaker::GenApi::CEventPort::m_pNode': class 'Spinnaker::GenApi::CPointer<Spinnaker::GenApi::INode,Spinnaker::GenApi::IBase>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::CEventPort'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\Pointer.h(276): message :  see declaration of 'Spinnaker::GenApi::CPointer<Spinnaker::GenApi::INode,Spinnaker::GenApi::IBase>'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\EventPort.h(160,56): warning C4251:  'Spinnaker::GenApi::CEventPort::m_pPortAdapter': class 'std::shared_ptr<Spinnaker::GenApi::PortAdapter>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::CEventPort'
+C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :  see declaration of 'std::shared_ptr<Spinnaker::GenApi::PortAdapter>'
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(16,20): warning C4018:  '<': signed/unsigned mismatch
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(102,37): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(131,37): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(200,21): warning C4018:  '<': signed/unsigned mismatch
   Generating code
-  2 of 941 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+  2 of 752 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    7 functions had inline decision re-evaluated but remain unchanged
+    9 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   VizlabRecording.vcxproj -> C:\Users\erlin\source\repos\VizlabRecording\x64\Release\VizlabRecording.exe

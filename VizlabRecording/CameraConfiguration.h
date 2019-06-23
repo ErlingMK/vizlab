@@ -19,9 +19,9 @@ public:
 	CameraConfiguration();
 	~CameraConfiguration();
 
-	static void SetTriggerMode(CameraPtr pCam, TriggerSourceEnums triggerSource, TriggerModeEnums triggerMode, TriggerSelectorEnums triggerSelector, TriggerActivationEnums triggerActivation);
-	static void EnableImageTimestamp(CameraPtr pCam);
-	static void ResetTrigger(CameraList &list);
-	static void SetBufferSize(INodeMap & sNodeMap, int numBuffers);
+	static void setTriggerMode(const CameraPtr& p_cam, TriggerSourceEnums trigger_source, TriggerModeEnums trigger_mode, TriggerSelectorEnums trigger_selector, TriggerActivationEnums trigger_activation);
+	static void enableImageTimestamp(const CameraPtr& p_cam);
+	static void resetTrigger(CameraList &list);
+	static void setBufferSize(INodeMap & s_node_map, int num_buffers);
 };
 

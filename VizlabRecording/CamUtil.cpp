@@ -25,15 +25,15 @@ CamUtil::~CamUtil()
 //	return true;
 //}
 
-CameraList CamUtil::RetrieveAllCameras(InterfaceList pInterfaceList)
+CameraList CamUtil::retrieveAllCameras(const InterfaceList p_interface_list)
 {
-	CameraList availableCameras;
-	for (int i = 0; i < pInterfaceList.GetSize(); ++i)
+	CameraList available_cameras;
+	for (auto i = 0; i < p_interface_list.GetSize(); ++i)
 	{
-		CameraList tempCamList = pInterfaceList.GetByIndex(i)->GetCameras();
-		if (tempCamList.GetSize() != 0) availableCameras.Append(tempCamList);
+		CameraList temp_cam_list = p_interface_list.GetByIndex(i)->GetCameras();
+		if (temp_cam_list.GetSize() != 0) available_cameras.Append(temp_cam_list);
 	}
-	return availableCameras;
+	return available_cameras;
 }
 
 void CamUtil::QueryInterface(InterfacePtr pInterface, int i)
@@ -58,16 +58,16 @@ void CamUtil::QueryInterface(InterfacePtr pInterface, int i)
 	}
 }
 
-void CamUtil::WriteDeviceInfo(Spinnaker::GenApi::INodeMap & nodeMap)
+void CamUtil::writeDeviceInfo(INodeMap & node_map)
 {
-	std::fstream mainCatalogueFile;
-	mainCatalogueFile.open("device_info.txt", std::ios::out | std::ios::app);
+	std::fstream main_catalogue_file;
+	main_catalogue_file.open("device_info.txt", std::ios::out | std::ios::app);
 
 	cout << endl << "*** DEVICE INFORMATION ***" << endl << endl;
 	try
 	{
 		FeatureList_t features;
-		CCategoryPtr category = nodeMap.GetNode("DeviceInformation");
+		CCategoryPtr category = node_map.GetNode("DeviceInformation");
 		if (IsAvailable(category) && IsReadable(category))
 		{
 			category->GetFeatures(features);
@@ -75,30 +75,30 @@ void CamUtil::WriteDeviceInfo(Spinnaker::GenApi::INodeMap & nodeMap)
 			FeatureList_t::const_iterator it;
 			for (it = features.begin(); it != features.end(); ++it)
 			{
-				if (mainCatalogueFile.is_open())
+				if (main_catalogue_file.is_open())
 				{
 					CNodePtr pfeatureNode = *it;
-					mainCatalogueFile << pfeatureNode->GetName() << " : ";
+					main_catalogue_file << pfeatureNode->GetName() << " : ";
 					CValuePtr pValue = (CValuePtr)pfeatureNode;
 					pValue->ToString();
-					mainCatalogueFile << (IsReadable(pValue) ? pValue->ToString() : (gcstring)"Node not readable");
-					mainCatalogueFile << endl;
+					main_catalogue_file << (IsReadable(pValue) ? pValue->ToString() : (gcstring)"Node not readable");
+					main_catalogue_file << endl;
 				}
 			}
-			mainCatalogueFile << '\n';
+			main_catalogue_file << '\n';
 		}
 		else
 		{
-			mainCatalogueFile << "Device control information not available." << endl;
+			main_catalogue_file << "Device control information not available." << endl;
 		}
 	}
 	catch (Spinnaker::Exception &e)
 	{
-		mainCatalogueFile << "Error: " << e.what() << endl;
-		mainCatalogueFile.close();
+		main_catalogue_file << "Error: " << e.what() << endl;
+		main_catalogue_file.close();
 		return;
 	}
-	mainCatalogueFile.close();
+	main_catalogue_file.close();
 }
 
 std::string CamUtil::CurrentDateTime()

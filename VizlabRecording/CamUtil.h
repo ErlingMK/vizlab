@@ -21,9 +21,9 @@ public:
 	CamUtil();
 	~CamUtil();
 
-	static CameraList RetrieveAllCameras(InterfaceList pInterfaceList);
+	static CameraList retrieveAllCameras(InterfaceList p_interface_list);
 	static void QueryInterface(InterfacePtr pInterface, int i);
-	static void WriteDeviceInfo(Spinnaker::GenApi::INodeMap & nodeMap);
+	static void writeDeviceInfo(Spinnaker::GenApi::INodeMap & node_map);
 	static std::string CurrentDateTime();
 };
 
