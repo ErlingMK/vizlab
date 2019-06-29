@@ -2,6 +2,9 @@
 #include "Recording.h"
 #include "CameraConfiguration.h"
 
+
+
+
 Recording::Recording(const InterfaceList interface_list, const RecordingParameters recording_parameters)
 {
 	m_interface_list_ = interface_list;
@@ -45,22 +48,19 @@ void Recording::prepareCameras()
 }
 
 
-void Recording::acquireImages(CameraPtr p_cam, const int num_of_images, shared_ptr<vector<ImagePtr>> images) const
+void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_images, shared_ptr<vector<ImagePtr>> images) const
 {
 	try
 	{
 		p_cam->Init();
 		p_cam->BeginAcquisition();
 		if (recording_parameters_.enable_hardware_trigger )std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
-		/*std::cout << "Thread goes to sleep." << std::endl;
-		std::this_thread::sleep_for(10s);
-		std::cout << "Thread wakes up." << std::endl;
-*/
+	
 		for (size_t image_count = 0; image_count < num_of_images; ++image_count)
 		{
 			try
 			{
-				auto p_result_image = p_cam->GetNextImage();
+				const auto p_result_image = p_cam->GetNextImage();
 
 				//TimePoint<chrono::nanoseconds> now = chrono::high_resolution_clock::now();
 				//timePoints->push_back(now);
@@ -74,7 +74,7 @@ void Recording::acquireImages(CameraPtr p_cam, const int num_of_images, shared_p
 					images->emplace_back(ImagePtr(p_result_image));
 					// std::cout << chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() << endl;
 					cout << "Camera " << p_cam->DeviceSerialNumber() << " grabbed image " << image_count << ", width = " << p_result_image->GetWidth() << ", height = " << p_result_image->GetHeight() << endl;
-					//p_result_image->Release();
+					p_result_image->Release();
 				}
 			}
 			catch (Exception& e)
@@ -89,49 +89,121 @@ void Recording::acquireImages(CameraPtr p_cam, const int num_of_images, shared_p
 	}
 }
 
+void Recording::acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, std::filesystem::path camera_dir) const
+{
+
+	try
+	{
+		p_cam->Init();
+		camera_dir += static_cast<std::string>(p_cam->DeviceSerialNumber());
+		create_directory(camera_dir);
+		p_cam->BeginAcquisition();
+		if (recording_parameters_.enable_hardware_trigger)std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
+
+		for (size_t image_count = 0; image_count < num_of_images; ++image_count)
+		{
+			try
+			{
+				const auto p_result_image = p_cam->GetNextImage();
+
+				if (p_result_image->IsIncomplete())
+				{
+					std::cout << "Image incomplete with image status " << p_result_image->GetImageStatus() << "..." << endl << endl;
+					p_result_image->Release();
+				}
+				else
+				{
+					cout << "Camera " << p_cam->DeviceSerialNumber() << " grabbed image " << image_count << ", width = " << p_result_image->GetWidth() << ", height = " << p_result_image->GetHeight() << endl;
+
+					auto converted_image = p_result_image->Convert(recording_parameters_.pixel_format_enum, recording_parameters_.color_processing_algorithm);
+
+					ostringstream filename;
+					filename << camera_dir.string();
+					filename << "/" << image_count;
+					converted_image->Save(filename.str().c_str(), recording_parameters_.image_file_format);
+					std::cout << "Image saved at " << filename.str() << endl;
+
+					p_result_image->Release();
+				}
+			}
+			catch (Exception& e)
+			{
+				std::cout << "Stopped!" << e.what() << endl << endl;
+			}
+		}
+		p_cam->EndAcquisition();
+		p_cam->DeInit();
+	}
+	catch (Exception& e)
+	{
+		std::cout << "Can't start acquisition: " << e.GetFullErrorMessage() << endl << endl;
+	}
+}
+
 void Recording::startRecording()
 {
 	// One shared pointer for each camera points to a vector of images.
 	vector<thread> threads;
-	vector<shared_ptr<vector<ImagePtr>>> ptr_vector;
 
 	//vector<shared_ptr<vector<TimePoint<chrono::nanoseconds>>>> timePoints;
 
-	for (size_t i = 0; i < cameras_.GetSize(); ++i)
+	if(!recording_parameters_.continuous_writing_to_disc)
 	{
-		auto p_cam = cameras_.GetByIndex(i);
-
-		ptr_vector.emplace_back(make_shared<vector<ImagePtr>>());
-		thread t(&Recording::acquireImages, this, p_cam, recording_parameters_.number_of_images_per_camera, ptr_vector[i]);
-		threads.push_back(move(t));
-
-		//timePoints.emplace_back(make_shared<vector<TimePoint<chrono::nanoseconds>>>());
-	}
-
-	for (auto& t : threads)
-	{
-		if (t.joinable())
+		vector<shared_ptr<vector<ImagePtr>>> ptr_vector;
+		for (size_t i = 0; i < cameras_.GetSize(); ++i)
 		{
-			t.join();
+			auto p_cam = cameras_.GetByIndex(i);
+
+			ptr_vector.emplace_back(make_shared<vector<ImagePtr>>());
+			thread t(&Recording::acquireImagesSaveAfterRec, this, p_cam, recording_parameters_.number_of_images_per_camera, ptr_vector[i]);
+			threads.push_back(move(t));
+
+			//timePoints.emplace_back(make_shared<vector<TimePoint<chrono::nanoseconds>>>());
+		}
+
+		for (auto& t : threads)
+		{
+			if (t.joinable())
+			{
+				t.join();
+			}
+		}
+		char answer;
+		std::cout << endl << "Recording complete. Save images?" << endl;
+		std::cout << "y/n?" << endl;
+		std::cin >> answer;
+		if (answer == 'y')
+		{
+			saveImages(ptr_vector);
+		}
+
+		for (size_t i = 0; i < cameras_.GetSize(); ++i)
+		{
+			auto p_cam = cameras_.GetByIndex(i);
+			p_cam->EndAcquisition();
+			p_cam->DeInit();
+		}
+	}
+	else
+	{
+		auto recording_dir = std::filesystem::path("D:/VizlabRecordings/" + currentDateTime());
+		filesystem::create_directories(recording_dir);
+		recording_dir += "/";
+		for(size_t i = 0; i < cameras_.GetSize(); ++i)
+		{
+			auto p_cam = cameras_.GetByIndex(i);
+			thread t(&Recording::acquireImagesSaveDuringRec, this, p_cam, recording_parameters_.number_of_images_per_camera, recording_dir);
+			threads.push_back(move(t));
+		}
+		for (auto& t : threads)
+		{
+			if (t.joinable())
+			{
+				t.join();
+			}
 		}
 	}
 
-
-	char answer;
-	std::cout << endl << "Recording complete. Save images?" << endl;
-	std::cout << "y/n?" << endl;
-	std::cin >> answer;
-	if(answer == 'y')
-	{
-		saveImages(ptr_vector);
-	}
-
-	for (size_t i = 0; i < cameras_.GetSize(); ++i)
-	{
-		auto p_cam = cameras_.GetByIndex(i);
-		p_cam->EndAcquisition();
-		p_cam->DeInit();
-	}
 	CameraConfiguration::resetTrigger(cameras_);
 
 	cameras_.Clear();

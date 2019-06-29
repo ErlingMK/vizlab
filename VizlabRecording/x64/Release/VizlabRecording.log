@@ -28,13 +28,14 @@ C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\EventPort.h(158,2
 C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\Pointer.h(276): message :  see declaration of 'Spinnaker::GenApi::CPointer<Spinnaker::GenApi::INode,Spinnaker::GenApi::IBase>'
 C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\EventPort.h(160,56): warning C4251:  'Spinnaker::GenApi::CEventPort::m_pPortAdapter': class 'std::shared_ptr<Spinnaker::GenApi::PortAdapter>' needs to have dll-interface to be used by clients of class 'Spinnaker::GenApi::CEventPort'
 C:\Users\erlin\source\repos\VizlabRecording\include\SpinGenApi\NodeMap.h(284): message :  see declaration of 'std::shared_ptr<Spinnaker::GenApi::PortAdapter>'
-C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(16,20): warning C4018:  '<': signed/unsigned mismatch
-C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(102,37): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(131,37): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
-C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(200,21): warning C4018:  '<': signed/unsigned mismatch
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(19,20): warning C4018:  '<': signed/unsigned mismatch
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(155,38): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(182,38): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(194,38): warning C4267:  'argument': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\erlin\source\repos\VizlabRecording\VizlabRecording\Recording.cpp(272,21): warning C4018:  '<': signed/unsigned mismatch
   Generating code
-  2 of 752 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  2 of 795 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    9 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   VizlabRecording.vcxproj -> C:\Users\erlin\source\repos\VizlabRecording\x64\Release\VizlabRecording.exe

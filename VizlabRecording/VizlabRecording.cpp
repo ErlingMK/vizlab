@@ -29,6 +29,7 @@ const string RecordingsDirectory = "D:/VizlabRecordings/";
 const string SerialNumbersFile= "D:/VizlabRecordings/serialnumbers.txt";
 string currentDateTime;
 
+
 //void CreateTimeDiffFile(shared_ptr<vector<TimePoint<chrono::nanoseconds>>> timePoints, std::string serialNumber)
 //{
 //	auto timeDiffFile = std::filesystem::path(RecordingsDirectory + currentDateTime + "/" + serialNumber + ".txt");
@@ -81,8 +82,7 @@ void runMultipleCameras(const InterfaceList& p_interface_list)
 		std::cout << endl << "Enter number of images to capture: " << endl;
 		std::cin >> num_of_images;
 	}
-
-	const RecordingParameters recording_parameters{ false, AcquisitionMode_Continuous, false, true, num_of_images, PixelFormat_Mono8, HQ_LINEAR, PGM};
+	const RecordingParameters recording_parameters{ true, AcquisitionMode_Continuous, false, true, num_of_images, PixelFormat_Mono8, HQ_LINEAR, PGM};
 
 	Recording recording{ p_interface_list, recording_parameters };
 	recording.prepareCameras();

@@ -12,6 +12,7 @@
 #include "SpinGenApi/SpinnakerGenApi.h"
 #include "RecordingParameters.h"
 
+struct RecordingParams;
 using namespace Spinnaker;
 using namespace GenApi;
 using namespace GenICam;
@@ -27,7 +28,8 @@ public:
 
 private:
 	void saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) const;
-	void acquireImages(CameraPtr p_cam, int num_of_images, shared_ptr<vector<ImagePtr>> images) const;
+	void acquireImagesSaveAfterRec(CameraPtr p_cam, int num_of_images, shared_ptr<vector<ImagePtr>> images) const;
+	void acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, std::filesystem::path camera_dir) const;
 	void queryInterface(const InterfacePtr& p_interface, int i) const;
 	void retrieveAllCameras(const InterfaceList& p_interface_list);
 	void writeDeviceInfoToFile(INodeMap& node_map) const;
