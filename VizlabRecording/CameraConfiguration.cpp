@@ -33,10 +33,7 @@ void CameraConfiguration::resetTrigger(CameraList & list)
 	for (size_t i = 0; i < list.GetSize(); ++i)
 	{
 		auto p_cam = list.GetByIndex(i);
-		p_cam->Init();
-		//INodeMap& nodeMap = pCam->GetNodeMap();
-		p_cam->TriggerMode.SetValue(Spinnaker::TriggerModeEnums::TriggerMode_Off);
-		p_cam->DeInit();
+		p_cam->TriggerMode.SetValue(TriggerMode_Off);
 	}
 }
 

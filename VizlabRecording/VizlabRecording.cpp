@@ -9,11 +9,8 @@
 #include <vector>
 #include <memory>
 #include <chrono>
-#include <sys/stat.h>
-#include "CameraConfiguration.h"
 #include "Recording.h"
-//#include "CamUtil.h"
-//#include <pthread.h>
+
 
 using namespace Spinnaker;
 using namespace Spinnaker::GenApi;
@@ -23,11 +20,7 @@ using namespace std;
 template<class Duration>
 using TimePoint = chrono::time_point<chrono::high_resolution_clock, Duration>;
 
-// TODO: Finn måte å hente mengde RAM og regn utifra det.
-const int MAX_IMAGES_PER_CAMERA = 1000;
-const string RecordingsDirectory = "D:/VizlabRecordings/";
-const string SerialNumbersFile= "D:/VizlabRecordings/serialnumbers.txt";
-string currentDateTime;
+const int MAX_IMAGES_PER_CAMERA = 10000;
 
 
 //void CreateTimeDiffFile(shared_ptr<vector<TimePoint<chrono::nanoseconds>>> timePoints, std::string serialNumber)
@@ -56,23 +49,41 @@ string currentDateTime;
 //	txtFile.close();
 //}
 
-void CreateTxtFile(string currentDateTime, CameraList& camList)
+std::string currentDateTime()
 {
-	std::fstream mainCatalogueFile;
-	mainCatalogueFile.open("Recordings/" + currentDateTime + "/" + currentDateTime + ".txt");
+	auto rawtime = time(nullptr);
+	struct tm tstruct {};
+	localtime_s(&tstruct, &rawtime);
+	char buf[80];
+	strftime(buf, sizeof(buf), "%d_%m_%y_%H_%M_%S", &tstruct);
+
+	return buf;
+}
+
+void copyTxtFile(const string& current_date_time, const string& serial_numbers_file, const string& recording_directory)
+{
 	try
 	{
-		std::filesystem::copy_file(SerialNumbersFile, RecordingsDirectory + currentDateTime + "/" + currentDateTime + ".txt");
+		std::filesystem::copy_file(serial_numbers_file, recording_directory + "/"+ current_date_time + ".txt");
 	} 
 	catch (std::filesystem::filesystem_error& e)
 	{
 		std::cout << e.what() << '\n';
 	}
-	mainCatalogueFile.close();
 }
 
-void runMultipleCameras(const InterfaceList& p_interface_list)
+void runMultipleCameras()
 {
+	const auto current_datetime = currentDateTime();
+
+	const string main_recordings_directory = "C:/Recordings";
+	const string serial_numbers_file = "C:/Recordings/serialnumbers.txt";
+
+	const auto rec_directory = main_recordings_directory + "/" + current_datetime;
+
+	SystemPtr system = System::GetInstance();
+	InterfaceList interface_list = system->GetInterfaces();
+	
 	int num_of_images;
 	std::cout << endl << "Enter number of images to capture:" << endl;
 	std::cin >> num_of_images;
@@ -82,23 +93,20 @@ void runMultipleCameras(const InterfaceList& p_interface_list)
 		std::cout << endl << "Enter number of images to capture: " << endl;
 		std::cin >> num_of_images;
 	}
-	const RecordingParameters recording_parameters{ true, AcquisitionMode_Continuous, false, true, num_of_images, PixelFormat_Mono8, HQ_LINEAR, PGM};
+	
+	const RecordingParameters recording_parameters{ true, AcquisitionMode_Continuous, false, true, num_of_images, PixelFormat_Mono8, HQ_LINEAR, PGM, rec_directory};
 
-	Recording recording{ p_interface_list, recording_parameters };
-	recording.prepareCameras();
+	Recording recording{ interface_list, recording_parameters };
+
 	recording.startRecording();
+
+	interface_list.Clear();
+	system->ReleaseInstance();
+
+	copyTxtFile(current_datetime, serial_numbers_file, main_recordings_directory);
 }
 
 int main(int argc, char const *argv[])
 {
-	SystemPtr system = System::GetInstance();
-	InterfaceList interface_list = system->GetInterfaces();
-
-	const auto num_interfaces = interface_list.GetSize();
-	std::cout << "Number of interfaces detected: " << num_interfaces << endl << endl;
-
-	runMultipleCameras(interface_list);
-
-	interface_list.Clear();
-	system->ReleaseInstance();
+	runMultipleCameras();
 }

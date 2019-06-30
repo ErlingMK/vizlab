@@ -12,47 +12,77 @@ Recording::Recording(const InterfaceList interface_list, const RecordingParamete
 	retrieveAllCameras(m_interface_list_);
 }
 
-void Recording::prepareCameras()
+void Recording::startRecording()
 {
-	CameraConfiguration::resetTrigger(cameras_);
+	prepareCameras();
 
-	for(auto i = 0; i < cameras_.GetSize(); ++i)
+	vector<thread> threads;
+	//vector<shared_ptr<vector<TimePoint<chrono::nanoseconds>>>> timePoints;
+
+	if(!recording_parameters_.continuous_writing_to_disc)
 	{
-		auto p_cam = cameras_.GetByIndex(i);
-		try
+		vector<shared_ptr<vector<ImagePtr>>> ptr_vector;
+		for (size_t i = 0; i < cameras_.GetSize(); ++i)
 		{
-			auto& tl_device_node_map = p_cam->GetTLDeviceNodeMap();
-			auto& tl_stream_node_map = p_cam->GetTLStreamNodeMap();
+			auto p_cam = cameras_.GetByIndex(i);
 
-			p_cam->Init();
-			CameraConfiguration::setBufferSize(tl_stream_node_map, recording_parameters_.number_of_images_per_camera);
+			ptr_vector.emplace_back(make_shared<vector<ImagePtr>>());
+			thread t(&Recording::acquireImagesSaveAfterRec, this, p_cam, recording_parameters_.number_of_images_per_camera, ptr_vector[i]);
+			threads.push_back(move(t));
 
-			if(recording_parameters_.write_device_info_to_file) writeDeviceInfoToFile(tl_device_node_map);
-
-			p_cam->AcquisitionMode.SetValue(recording_parameters_.acquisition_mode_enum);
-			std::cout << "Set to: " << recording_parameters_.acquisition_mode_enum << std::endl;
-
-			if(recording_parameters_.enable_hardware_trigger)
-			{
-				CameraConfiguration::setTriggerMode(p_cam, TriggerSource_Line0, TriggerMode_On, TriggerSelector_FrameStart, TriggerActivation_RisingEdge);
-				std::cout << std::endl << "Hardware trigger enabled!" << std::endl;
-				// CameraConfiguration::enableImageTimestamp(p_cam);
-			}
-			p_cam->DeInit();
+			//timePoints.emplace_back(make_shared<vector<TimePoint<chrono::nanoseconds>>>());
 		}
-		catch (Exception& e)
+
+		for (auto& t : threads)
 		{
-			std::cout << "Error: " << e.what() << std::endl;
+			if (t.joinable())
+			{
+				t.join();
+			}
+		}
+
+		char answer;
+		std::cout << endl << "Recording complete. Save images?" << endl;
+		std::cout << "y/n?" << endl;
+		std::cin >> answer;
+		if (answer == 'y')
+		{
+			saveImages(ptr_vector);
+		}
+
+		for (size_t i = 0; i < cameras_.GetSize(); ++i)
+		{
+			auto p_cam = cameras_.GetByIndex(i);
+			p_cam->EndAcquisition();
 		}
 	}
-}
+	else
+	{
+		auto recording_dir = std::filesystem::path(recording_parameters_.recording_directory);
+		filesystem::create_directories(recording_dir);
+		recording_dir += "/";
+		for(size_t i = 0; i < cameras_.GetSize(); ++i)
+		{
+			auto p_cam = cameras_.GetByIndex(i);
+			thread t(&Recording::acquireImagesSaveDuringRec, this, p_cam, recording_parameters_.number_of_images_per_camera, recording_dir);
+			threads.push_back(move(t));
+		}
+		for (auto& t : threads)
+		{
+			if (t.joinable())
+			{
+				t.join();
+			}
+		}
+	}
 
+	resetCameras();
+}
 
 void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_images, shared_ptr<vector<ImagePtr>> images) const
 {
 	try
 	{
-		p_cam->Init();
 		p_cam->BeginAcquisition();
 		if (recording_parameters_.enable_hardware_trigger )std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
 	
@@ -89,15 +119,15 @@ void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_imag
 	}
 }
 
-void Recording::acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, std::filesystem::path camera_dir) const
+void Recording::acquireImagesSaveDuringRec(const CameraPtr& p_cam, const int num_of_images, std::filesystem::path recording_directory) const
 {
-
 	try
 	{
-		p_cam->Init();
-		camera_dir += static_cast<std::string>(p_cam->DeviceSerialNumber());
-		create_directory(camera_dir);
+		const auto cam_directory = recording_directory += static_cast<std::string>(p_cam->DeviceSerialNumber());
+		create_directory(recording_directory);
+
 		p_cam->BeginAcquisition();
+
 		if (recording_parameters_.enable_hardware_trigger)std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
 
 		for (size_t image_count = 0; image_count < num_of_images; ++image_count)
@@ -118,8 +148,9 @@ void Recording::acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, s
 					auto converted_image = p_result_image->Convert(recording_parameters_.pixel_format_enum, recording_parameters_.color_processing_algorithm);
 
 					ostringstream filename;
-					filename << camera_dir.string();
+					filename << cam_directory.string();
 					filename << "/" << image_count;
+
 					converted_image->Save(filename.str().c_str(), recording_parameters_.image_file_format);
 					std::cout << "Image saved at " << filename.str() << endl;
 
@@ -132,7 +163,6 @@ void Recording::acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, s
 			}
 		}
 		p_cam->EndAcquisition();
-		p_cam->DeInit();
 	}
 	catch (Exception& e)
 	{
@@ -140,93 +170,22 @@ void Recording::acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, s
 	}
 }
 
-void Recording::startRecording()
-{
-	// One shared pointer for each camera points to a vector of images.
-	vector<thread> threads;
-
-	//vector<shared_ptr<vector<TimePoint<chrono::nanoseconds>>>> timePoints;
-
-	if(!recording_parameters_.continuous_writing_to_disc)
-	{
-		vector<shared_ptr<vector<ImagePtr>>> ptr_vector;
-		for (size_t i = 0; i < cameras_.GetSize(); ++i)
-		{
-			auto p_cam = cameras_.GetByIndex(i);
-
-			ptr_vector.emplace_back(make_shared<vector<ImagePtr>>());
-			thread t(&Recording::acquireImagesSaveAfterRec, this, p_cam, recording_parameters_.number_of_images_per_camera, ptr_vector[i]);
-			threads.push_back(move(t));
-
-			//timePoints.emplace_back(make_shared<vector<TimePoint<chrono::nanoseconds>>>());
-		}
-
-		for (auto& t : threads)
-		{
-			if (t.joinable())
-			{
-				t.join();
-			}
-		}
-		char answer;
-		std::cout << endl << "Recording complete. Save images?" << endl;
-		std::cout << "y/n?" << endl;
-		std::cin >> answer;
-		if (answer == 'y')
-		{
-			saveImages(ptr_vector);
-		}
-
-		for (size_t i = 0; i < cameras_.GetSize(); ++i)
-		{
-			auto p_cam = cameras_.GetByIndex(i);
-			p_cam->EndAcquisition();
-			p_cam->DeInit();
-		}
-	}
-	else
-	{
-		auto recording_dir = std::filesystem::path("D:/VizlabRecordings/" + currentDateTime());
-		filesystem::create_directories(recording_dir);
-		recording_dir += "/";
-		for(size_t i = 0; i < cameras_.GetSize(); ++i)
-		{
-			auto p_cam = cameras_.GetByIndex(i);
-			thread t(&Recording::acquireImagesSaveDuringRec, this, p_cam, recording_parameters_.number_of_images_per_camera, recording_dir);
-			threads.push_back(move(t));
-		}
-		for (auto& t : threads)
-		{
-			if (t.joinable())
-			{
-				t.join();
-			}
-		}
-	}
-
-	CameraConfiguration::resetTrigger(cameras_);
-
-	cameras_.Clear();
-}
-
 void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) const
 {
 	auto camera = 0;
 	vector<thread> threads;
 
-	auto recording_dir = std::filesystem::path("D:/VizlabRecordings/" + currentDateTime());
+	auto recording_dir = std::filesystem::path(recording_parameters_.recording_directory);
 	filesystem::create_directories(recording_dir);
 	recording_dir += "/";
 
-	//CreateTxtFile(currentDateTime, camList);
 
-	// Loops through cameras
 	for (const auto& v : image_vectors)
 	{
 		auto p_cam = cameras_.GetByIndex(camera);
 		auto params = recording_parameters_;
 
-		thread t([v ,&recording_dir, p_cam, &params]
+		thread t([v ,recording_dir, p_cam, params]
 		{
 			auto camera_dir = std::filesystem::path(recording_dir);
 			camera_dir += static_cast<std::string>(p_cam->DeviceSerialNumber());
@@ -267,6 +226,54 @@ void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) 
 	}
 }
 
+void Recording::prepareCameras()
+{
+	CameraConfiguration::resetTrigger(cameras_);
+
+	for(auto i = 0; i < cameras_.GetSize(); ++i)
+	{
+		auto p_cam = cameras_.GetByIndex(i);
+		try
+		{
+			p_cam->Init();
+			
+			auto& tl_device_node_map = p_cam->GetTLDeviceNodeMap();
+			auto& tl_stream_node_map = p_cam->GetTLStreamNodeMap();
+
+			CameraConfiguration::setBufferSize(tl_stream_node_map, recording_parameters_.number_of_images_per_camera);
+
+			if(recording_parameters_.write_device_info_to_file) writeDeviceInfoToFile(tl_device_node_map);
+
+			p_cam->AcquisitionMode.SetValue(recording_parameters_.acquisition_mode_enum);
+			std::cout << "Set to: " << recording_parameters_.acquisition_mode_enum << std::endl;
+
+			// CameraConfiguration::enableImageTimestamp(p_cam);
+
+			if(recording_parameters_.enable_hardware_trigger)
+			{
+				CameraConfiguration::setTriggerMode(p_cam, TriggerSource_Line0, TriggerMode_On, TriggerSelector_FrameStart, TriggerActivation_RisingEdge);
+				std::cout << std::endl << "Hardware trigger enabled!" << std::endl;
+			}
+		}
+		catch (Exception& e)
+		{
+			std::cout << "Error: " << e.what() << std::endl;
+		}
+	}
+}
+
+void Recording::resetCameras()
+{
+	CameraConfiguration::resetTrigger(cameras_);
+
+	for (int i = 0; i < cameras_.GetSize(); ++i)
+	{
+		auto p_cam = cameras_.GetByIndex(i);
+		p_cam->DeInit();
+	}
+	cameras_.Clear();
+}
+
 void Recording::retrieveAllCameras(const InterfaceList& p_interface_list)
 {
 	for (auto i = 0; i < p_interface_list.GetSize(); ++i)
@@ -302,8 +309,8 @@ void Recording::queryInterface(const InterfacePtr& p_interface, const int i) con
 
 void Recording::writeDeviceInfoToFile(INodeMap& node_map) const
 {
-	fstream main_catalogue_file;
-	main_catalogue_file.open("device_info.txt", std::ios::out | std::ios::app);
+	fstream catalog_file;
+	catalog_file.open("device_info.txt", std::ios::out | std::ios::app);
 
 	cout << endl << "*** DEVICE INFORMATION ***" << endl << endl;
 	try
@@ -316,29 +323,29 @@ void Recording::writeDeviceInfoToFile(INodeMap& node_map) const
 
 			for (FeatureList_t::const_iterator it = features.begin(); it != features.end(); ++it)
 			{
-				if (main_catalogue_file.is_open())
+				if (catalog_file.is_open())
 				{
 					CNodePtr pfeature_node = *it;
-					main_catalogue_file << pfeature_node->GetName() << " : ";
+					catalog_file << pfeature_node->GetName() << " : ";
 					auto p_value = static_cast<CValuePtr>(pfeature_node);
-					main_catalogue_file << (IsReadable(p_value) ? p_value->ToString() : static_cast<gcstring>("Node not readable"));
-					main_catalogue_file << endl;
+					catalog_file << (IsReadable(p_value) ? p_value->ToString() : static_cast<gcstring>("Node not readable"));
+					catalog_file << endl;
 				}
 			}
-			main_catalogue_file << '\n';
+			catalog_file << '\n';
 		}
 		else
 		{
-			main_catalogue_file << "Device control information not available." << endl;
+			catalog_file << "Device control information not available." << endl;
 		}
 	}
 	catch (Exception& e)
 	{
-		main_catalogue_file << "Error: " << e.what() << endl;
-		main_catalogue_file.close();
+		catalog_file << "Error: " << e.what() << endl;
+		catalog_file.close();
 		return;
 	}
-	main_catalogue_file.close();
+	catalog_file.close();
 }
 
 std::string Recording::currentDateTime()
@@ -351,17 +358,3 @@ std::string Recording::currentDateTime()
 
 	return buf;
 }
-
-//bool check_permissions() {
-//	FILE *tempFile = fopen("test.txt", "w+");
-//	if (tempFile == NULL)
-//	{
-//		cout << "Failed to create file in current folder.  Please check permissions." << endl;
-//		cout << "Press Enter to exit..." << endl;
-//		getchar();
-//		return false;
-//	}
-//	fclose(tempFile);
-//	remove("test.txt");
-//	return true;
-//}

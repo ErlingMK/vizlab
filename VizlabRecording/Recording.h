@@ -23,13 +23,14 @@ class Recording
 public:
 	Recording(InterfaceList interface_list, RecordingParameters recording_parameters);
 
-	void prepareCameras();
 	void startRecording();
 
 private:
+	void prepareCameras();
+	void resetCameras();
 	void saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) const;
 	void acquireImagesSaveAfterRec(CameraPtr p_cam, int num_of_images, shared_ptr<vector<ImagePtr>> images) const;
-	void acquireImagesSaveDuringRec(CameraPtr p_cam, int num_of_images, std::filesystem::path camera_dir) const;
+	void acquireImagesSaveDuringRec(const CameraPtr& p_cam, int num_of_images, std::filesystem::path recording_directory) const;
 	void queryInterface(const InterfacePtr& p_interface, int i) const;
 	void retrieveAllCameras(const InterfaceList& p_interface_list);
 	void writeDeviceInfoToFile(INodeMap& node_map) const;
