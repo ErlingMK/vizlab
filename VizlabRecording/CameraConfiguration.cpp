@@ -89,3 +89,9 @@ void CameraConfiguration::setBufferSize(INodeMap & s_node_map, const int num_buf
 	}
 	std::cout << "Buffer count now set to: " << ptrBufferCount->GetValue() << std::endl;
 }
+
+void CameraConfiguration::setAcquisitionMode(const CameraPtr& p_cam, AcquisitionModeEnums acquisition_mode)
+{
+	p_cam->AcquisitionMode.SetValue(acquisition_mode);
+	std::cout << "Set to: " << acquisition_mode << std::endl;
+}
