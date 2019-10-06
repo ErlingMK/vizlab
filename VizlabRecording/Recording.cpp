@@ -17,6 +17,8 @@ void Recording::startRecording()
 	prepareCameras();
 
 	vector<thread> threads;
+
+	// Can be used to store the timepoints of each image. Haven't tested properly.
 	//vector<shared_ptr<vector<TimePoint<chrono::nanoseconds>>>> timePoints;
 
 	if(!recording_parameters_.continuous_writing_to_disc)
@@ -27,9 +29,12 @@ void Recording::startRecording()
 			auto p_cam = cameras_.GetByIndex(i);
 
 			ptr_vector.emplace_back(make_shared<vector<ImagePtr>>());
+
+			// Acquire images and keeps them in memory until recording is complete.
 			thread t(&Recording::acquireImagesSaveAfterRec, this, p_cam, recording_parameters_.number_of_images_per_camera, ptr_vector[i]);
 			threads.push_back(move(t));
 
+			// Can be used to store the timepoints of each image. Haven't tested properly.
 			//timePoints.emplace_back(make_shared<vector<TimePoint<chrono::nanoseconds>>>());
 		}
 
@@ -53,6 +58,7 @@ void Recording::startRecording()
 		for (size_t i = 0; i < cameras_.GetSize(); ++i)
 		{
 			auto p_cam = cameras_.GetByIndex(i);
+			// Releases image buffers. Images stored in memory must be saved before this is called.
 			p_cam->EndAcquisition();
 		}
 	}
@@ -61,9 +67,12 @@ void Recording::startRecording()
 		auto recording_dir = std::filesystem::path(recording_parameters_.recording_directory);
 		filesystem::create_directories(recording_dir);
 		recording_dir += "/";
+
 		for(size_t i = 0; i < cameras_.GetSize(); ++i)
 		{
 			auto p_cam = cameras_.GetByIndex(i);
+
+			// Writes each image to disc after its taken. 
 			thread t(&Recording::acquireImagesSaveDuringRec, this, p_cam, recording_parameters_.number_of_images_per_camera, recording_dir);
 			threads.push_back(move(t));
 		}
@@ -79,12 +88,14 @@ void Recording::startRecording()
 	resetCameras();
 }
 
+// Acquire images and keeps them in memory until recording is complete.
 void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_images, shared_ptr<vector<ImagePtr>> images) const
 {
 	try
 	{
 		p_cam->BeginAcquisition();
-		if (recording_parameters_.enable_hardware_trigger )std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
+
+		if (recording_parameters_.enable_hardware_trigger) std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
 	
 		for (size_t image_count = 0; image_count < num_of_images; ++image_count)
 		{
@@ -92,6 +103,7 @@ void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_imag
 			{
 				const auto p_result_image = p_cam->GetNextImage();
 
+				// Can be used to store the timepoints of each image. Haven't tested properly.
 				//TimePoint<chrono::nanoseconds> now = chrono::high_resolution_clock::now();
 				//timePoints->push_back(now);
 
@@ -102,7 +114,10 @@ void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_imag
 				else
 				{
 					images->emplace_back(ImagePtr(p_result_image));
+
+					// Can be used to store the timepoints of each image. Haven't tested properly.
 					// std::cout << chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count() << endl;
+
 					cout << "Camera " << p_cam->DeviceSerialNumber() << " grabbed image " << image_count << ", width = " << p_result_image->GetWidth() << ", height = " << p_result_image->GetHeight() << endl;
 					p_result_image->Release();
 				}
@@ -119,6 +134,7 @@ void Recording::acquireImagesSaveAfterRec(CameraPtr p_cam, const int num_of_imag
 	}
 }
 
+// Writes each image to disc after its taken. 
 void Recording::acquireImagesSaveDuringRec(const CameraPtr& p_cam, const int num_of_images, std::filesystem::path recording_directory) const
 {
 	try
@@ -128,7 +144,7 @@ void Recording::acquireImagesSaveDuringRec(const CameraPtr& p_cam, const int num
 
 		p_cam->BeginAcquisition();
 
-		if (recording_parameters_.enable_hardware_trigger)std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
+		if (recording_parameters_.enable_hardware_trigger) std::cout << endl << "Camera: " << p_cam->DeviceSerialNumber() << ' ' << "Waiting for trigger..." << endl;
 
 		for (size_t image_count = 0; image_count < num_of_images; ++image_count)
 		{
@@ -149,6 +165,8 @@ void Recording::acquireImagesSaveDuringRec(const CameraPtr& p_cam, const int num
 
 					ostringstream filename;
 					filename << cam_directory.string();
+
+					// Currently uses the count of the current image as its filename. If this is changed it must be changed in the ImageCombiner too. Check comment there(Combiner.cpp, line 23). 
 					filename << "/" << image_count;
 
 					converted_image->Save(filename.str().c_str(), recording_parameters_.image_file_format);
@@ -170,6 +188,7 @@ void Recording::acquireImagesSaveDuringRec(const CameraPtr& p_cam, const int num
 	}
 }
 
+// Used when writing images to disc after recording.
 void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) const
 {
 	auto camera = 0;
@@ -185,7 +204,7 @@ void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) 
 		auto p_cam = cameras_.GetByIndex(camera);
 		auto params = recording_parameters_;
 
-		thread t([v ,recording_dir, p_cam, params]
+		thread t([v, recording_dir, p_cam, params]
 		{
 			auto camera_dir = std::filesystem::path(recording_dir);
 			camera_dir += static_cast<std::string>(p_cam->DeviceSerialNumber());
@@ -195,7 +214,7 @@ void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) 
 			for (const auto& image : *v)
 			{
 				++counter;
-				if (!(image->IsIncomplete()))
+				if (!image->IsIncomplete())
 				{
 					try
 					{
@@ -203,7 +222,10 @@ void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) 
 
 						ostringstream filename;
 						filename << camera_dir.string();
+
+						// Currently uses the count of the current image as its filename. If this is changed it must be changed in the ImageCombiner too. Check comment there(Combiner.cpp, line 23). 
 						filename << "/" << counter;
+
 						converted_image->Save(filename.str().c_str(), params.image_file_format);
 						std::cout << "Image saved at " << filename.str() << endl;
 					}
@@ -217,6 +239,7 @@ void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) 
 		threads.push_back(move(t));
 		camera++;
 	}
+
 	for (auto& t : threads)
 	{
 		if (t.joinable())
@@ -228,6 +251,7 @@ void Recording::saveImages(vector<shared_ptr<vector<ImagePtr>>>& image_vectors) 
 
 void Recording::prepareCameras()
 {
+	// Good idea(according to docs) to reset triggers every time.
 	CameraConfiguration::resetTrigger(cameras_);
 
 	for(auto i = 0; i < cameras_.GetSize(); ++i)
@@ -240,20 +264,15 @@ void Recording::prepareCameras()
 			auto& tl_device_node_map = p_cam->GetTLDeviceNodeMap();
 			auto& tl_stream_node_map = p_cam->GetTLStreamNodeMap();
 
-			CameraConfiguration::setBufferSize(tl_stream_node_map, recording_parameters_.number_of_images_per_camera);
+			if(!recording_parameters_.continuous_writing_to_disc) CameraConfiguration::setBufferSize(tl_stream_node_map, recording_parameters_.number_of_images_per_camera);
 
 			if(recording_parameters_.write_device_info_to_file) writeDeviceInfoToFile(tl_device_node_map);
 
-			p_cam->AcquisitionMode.SetValue(recording_parameters_.acquisition_mode_enum);
-			std::cout << "Set to: " << recording_parameters_.acquisition_mode_enum << std::endl;
+			CameraConfiguration::setAcquisitionMode(p_cam, recording_parameters_.acquisition_mode_enum);
 
-			// CameraConfiguration::enableImageTimestamp(p_cam);
-
-			if(recording_parameters_.enable_hardware_trigger)
-			{
-				CameraConfiguration::setTriggerMode(p_cam, TriggerSource_Line0, TriggerMode_On, TriggerSelector_FrameStart, TriggerActivation_RisingEdge);
-				std::cout << std::endl << "Hardware trigger enabled!" << std::endl;
-			}
+			// Set trigger activation parameters here. 
+			if(recording_parameters_.enable_hardware_trigger) CameraConfiguration::setTriggerMode(p_cam, TriggerSource_Line0, TriggerMode_On, TriggerSelector_FrameStart, TriggerActivation_RisingEdge);
+		
 		}
 		catch (Exception& e)
 		{
@@ -266,7 +285,7 @@ void Recording::resetCameras()
 {
 	CameraConfiguration::resetTrigger(cameras_);
 
-	for (int i = 0; i < cameras_.GetSize(); ++i)
+	for (auto i = 0; i < cameras_.GetSize(); ++i)
 	{
 		auto p_cam = cameras_.GetByIndex(i);
 		p_cam->DeInit();
@@ -274,6 +293,7 @@ void Recording::resetCameras()
 	cameras_.Clear();
 }
 
+// Finds all available cameras connected to the list of interfaces found in VizlabRecording.cpp.
 void Recording::retrieveAllCameras(const InterfaceList& p_interface_list)
 {
 	for (auto i = 0; i < p_interface_list.GetSize(); ++i)
@@ -285,6 +305,7 @@ void Recording::retrieveAllCameras(const InterfaceList& p_interface_list)
 	else std::cout << std::endl << "Numbers of cameras detected: " << cameras_.GetSize() << endl;
 }
 
+// Writes information about the available interfaces to he console. Not needed for recording.
 void Recording::queryInterface(const InterfacePtr& p_interface, const int i) const
 {
 	try
@@ -307,6 +328,8 @@ void Recording::queryInterface(const InterfacePtr& p_interface, const int i) con
 	}
 }
 
+
+// Writes information about certain camera nodes to file. Not needed for recording.
 void Recording::writeDeviceInfoToFile(INodeMap& node_map) const
 {
 	fstream catalog_file;

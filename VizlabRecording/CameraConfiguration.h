@@ -23,5 +23,6 @@ public:
 	static void enableImageTimestamp(const CameraPtr& p_cam);
 	static void resetTrigger(CameraList &list);
 	static void setBufferSize(INodeMap & s_node_map, int num_buffers);
+	static void setAcquisitionMode(const CameraPtr& p_cam, AcquisitionModeEnums acquisition_mode);
 };
 

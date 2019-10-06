@@ -20,7 +20,7 @@ using namespace std;
 template<class Duration>
 using TimePoint = chrono::time_point<chrono::high_resolution_clock, Duration>;
 
-const int MAX_IMAGES_PER_CAMERA = 10000;
+const int MAX_IMAGES_PER_CAMERA = 20000;
 
 
 //void CreateTimeDiffFile(shared_ptr<vector<TimePoint<chrono::nanoseconds>>> timePoints, std::string serialNumber)
@@ -60,11 +60,11 @@ std::string currentDateTime()
 	return buf;
 }
 
-void copyTxtFile(const string& current_date_time, const string& serial_numbers_file, const string& recording_directory)
+void copyTxtFile(const string& new_rec_directory_name, const string& serial_numbers_file_path, const string& main_recording_directory)
 {
 	try
 	{
-		std::filesystem::copy_file(serial_numbers_file, recording_directory + "/"+ current_date_time + ".txt");
+		std::filesystem::copy_file(serial_numbers_file_path, main_recording_directory + "/"+ new_rec_directory_name + ".txt");
 	} 
 	catch (std::filesystem::filesystem_error& e)
 	{
@@ -74,12 +74,14 @@ void copyTxtFile(const string& current_date_time, const string& serial_numbers_f
 
 void runMultipleCameras()
 {
-	const auto current_datetime = currentDateTime();
-
 	const string main_recordings_directory = "C:/Recordings";
-	const string serial_numbers_file = "C:/Recordings/serialnumbers.txt";
 
-	const auto rec_directory = main_recordings_directory + "/" + current_datetime;
+	const auto new_rec_directory_name = currentDateTime();
+
+	// You should make a file and write the serial numbers in the order you want the images to appear in the combined image. This file will be copied and put in each new recording directory and used by the ImageCombiner. 
+	const string serial_numbers_file_path = main_recordings_directory + "/" + "serialnumbers.txt";
+
+	const auto new_rec_directory = main_recordings_directory + "/" + new_rec_directory_name;
 
 	SystemPtr system = System::GetInstance();
 	InterfaceList interface_list = system->GetInterfaces();
@@ -94,7 +96,7 @@ void runMultipleCameras()
 		std::cin >> num_of_images;
 	}
 	
-	const RecordingParameters recording_parameters{ true, AcquisitionMode_Continuous, false, true, num_of_images, PixelFormat_Mono8, HQ_LINEAR, PGM, rec_directory};
+	const RecordingParameters recording_parameters{ true, AcquisitionMode_Continuous, false, true, num_of_images, PixelFormat_Mono8, HQ_LINEAR, PGM, new_rec_directory};
 
 	Recording recording{ interface_list, recording_parameters };
 
@@ -103,7 +105,7 @@ void runMultipleCameras()
 	interface_list.Clear();
 	system->ReleaseInstance();
 
-	copyTxtFile(current_datetime, serial_numbers_file, main_recordings_directory);
+	copyTxtFile(new_rec_directory_name, serial_numbers_file_path, main_recordings_directory);
 }
 
 int main(int argc, char const *argv[])
